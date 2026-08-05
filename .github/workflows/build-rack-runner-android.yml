@@ -1,0 +1,56 @@
+name: Build Rack Runner Android APK
+
+on:
+  push:
+    branches:
+      - rack-runner-share-ready-v1
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Reconstruct Android source
+        run: |
+          cat .rr-android/part*.b64 | base64 --decode > /tmp/RackRunner-Android-Source.tar.gz
+          echo "7753345bf9e5e7e04d8525701e8718a47b2705bd946c89a19fd8a497b7149e65  /tmp/RackRunner-Android-Source.tar.gz" | sha256sum --check -
+          tar -xzf /tmp/RackRunner-Android-Source.tar.gz
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Build unsigned release APK
+        working-directory: RackRunner-Android-Source
+        run: gradle --no-daemon --stacktrace :app:assembleRelease
+
+      - name: Upload unsigned APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: RackRunner-unsigned-apk
+          path: RackRunner-Android-Source/app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
+          retention-days: 7
