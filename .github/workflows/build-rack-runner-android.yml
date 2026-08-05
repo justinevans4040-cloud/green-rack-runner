@@ -56,11 +56,19 @@ jobs:
         working-directory: RackRunner-Android-Source
         run: gradle --no-daemon --stacktrace :app:assembleRelease
 
-      - name: Upload unsigned APK
+      - name: Align release APK
+        run: |
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -f -P 16 4 \
+            RackRunner-Android-Source/app/build/outputs/apk/release/app-release-unsigned.apk \
+            RackRunner-Android-Source/app/build/outputs/apk/release/RackRunner-aligned-unsigned.apk
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -P 16 -v 4 \
+            RackRunner-Android-Source/app/build/outputs/apk/release/RackRunner-aligned-unsigned.apk
+
+      - name: Upload aligned unsigned APK
         uses: actions/upload-artifact@v4
         with:
-          name: RackRunner-unsigned-apk
-          path: RackRunner-Android-Source/app/build/outputs/apk/release/app-release-unsigned.apk
+          name: RackRunner-aligned-unsigned-apk
+          path: RackRunner-Android-Source/app/build/outputs/apk/release/RackRunner-aligned-unsigned.apk
           if-no-files-found: error
           retention-days: 7
 
@@ -68,14 +76,13 @@ jobs:
         run: |
           mkdir -p /tmp/android-apk-tools/lib
           cp "$ANDROID_HOME/build-tools/35.0.0/apksigner" /tmp/android-apk-tools/
-          cp "$ANDROID_HOME/build-tools/35.0.0/zipalign" /tmp/android-apk-tools/
           cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" /tmp/android-apk-tools/lib/
-          chmod +x /tmp/android-apk-tools/apksigner /tmp/android-apk-tools/zipalign
+          chmod +x /tmp/android-apk-tools/apksigner
 
       - name: Upload official Android signing tools
         uses: actions/upload-artifact@v4
         with:
-          name: Android-apk-signing-tools
+          name: Android-apksigner
           path: /tmp/android-apk-tools
           if-no-files-found: error
           retention-days: 1
