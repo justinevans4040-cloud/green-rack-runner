@@ -1,0 +1,88 @@
+name: Build Rack Runner Android APK
+
+on:
+  push:
+    branches:
+      - rack-runner-share-ready-v1
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Verify and reconstruct Android source
+        run: |
+          cat > /tmp/parts.sha256 <<'EOF'
+          e0e3aa0afc6058107bfbb1aeddae61749b1e525b07fb6ab78f264c1551a206f0  .rr-android/part01.b64
+          4b76d37b01f327ef5fada29194fa1ae184057b87fc1c52824401ec70860e13ec  .rr-android/part02.b64
+          27a565a598bb8154c06cfd7ad333ea1f69cbc9651c279499a3a0db5b6451e030  .rr-android/part03.b64
+          9ef2b82fa09d95b31e65e0f6ff66bbb4a3a99339010973ebbdba74c1e50fcadf  .rr-android/part04.b64
+          b9de88e1d69cfd8c4b99b79c1de656dc57cc364bd07c8811e9995e8ed36d8c93  .rr-android/part05.b64
+          7ed224cb924f0bcc5009ee4eb957d4a2c1b9e9ccbaf8cfab3542fbb179b31459  .rr-android/part06.b64
+          EOF
+          sha256sum --check /tmp/parts.sha256
+          cat .rr-android/part*.b64 | base64 --decode > /tmp/RackRunner-Android-Source.tar.gz
+          echo "7753345bf9e5e7e04d8525701e8718a47b2705bd946c89a19fd8a497b7149e65  /tmp/RackRunner-Android-Source.tar.gz" | sha256sum --check -
+          tar -xzf /tmp/RackRunner-Android-Source.tar.gz
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Build unsigned release APK
+        working-directory: RackRunner-Android-Source
+        run: gradle --no-daemon --stacktrace :app:assembleRelease
+
+      - name: Align release APK
+        run: |
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -f -P 16 4 \
+            RackRunner-Android-Source/app/build/outputs/apk/release/app-release-unsigned.apk \
+            RackRunner-Android-Source/app/build/outputs/apk/release/RackRunner-aligned-unsigned.apk
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -P 16 -v 4 \
+            RackRunner-Android-Source/app/build/outputs/apk/release/RackRunner-aligned-unsigned.apk
+
+      - name: Upload aligned unsigned APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: RackRunner-aligned-unsigned-apk
+          path: RackRunner-Android-Source/app/build/outputs/apk/release/RackRunner-aligned-unsigned.apk
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Package official Android signing tools
+        run: |
+          mkdir -p /tmp/android-apk-tools/lib
+          cp "$ANDROID_HOME/build-tools/35.0.0/apksigner" /tmp/android-apk-tools/
+          cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" /tmp/android-apk-tools/lib/
+          chmod +x /tmp/android-apk-tools/apksigner
+
+      - name: Upload official Android signing tools
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-apksigner
+          path: /tmp/android-apk-tools
+          if-no-files-found: error
+          retention-days: 1
