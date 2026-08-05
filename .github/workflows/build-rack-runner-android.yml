@@ -63,3 +63,19 @@ jobs:
           path: RackRunner-Android-Source/app/build/outputs/apk/release/app-release-unsigned.apk
           if-no-files-found: error
           retention-days: 7
+
+      - name: Package official Android signing tools
+        run: |
+          mkdir -p /tmp/android-apk-tools/lib
+          cp "$ANDROID_HOME/build-tools/35.0.0/apksigner" /tmp/android-apk-tools/
+          cp "$ANDROID_HOME/build-tools/35.0.0/zipalign" /tmp/android-apk-tools/
+          cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" /tmp/android-apk-tools/lib/
+          chmod +x /tmp/android-apk-tools/apksigner /tmp/android-apk-tools/zipalign
+
+      - name: Upload official Android signing tools
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-apk-signing-tools
+          path: /tmp/android-apk-tools
+          if-no-files-found: error
+          retention-days: 1
