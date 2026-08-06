@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'none';">
+  <title>Green Rack Runner</title>
+  <style>
+    :root{--bg:#04100b;--panel:#081a12;--panel2:#0d2418;--panel3:#123321;--line:rgba(180,255,211,.16);--line2:rgba(82,255,155,.28);--text:#effff5;--muted:#a3c9b2;--soft:#6d8c77;--green:#35ff8a;--lime:#b7ff52;--amber:#ffd166;--red:#ff5a6a;--blue:#70d7ff;--shadow:0 24px 70px rgba(0,0,0,.45);--r:18px}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 15% 0,rgba(53,255,138,.18),transparent 30%),radial-gradient(circle at 85% 10%,rgba(183,255,82,.12),transparent 26%),linear-gradient(135deg,#020704,#06180f 52%,#03110b);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+    button,input,select,textarea{font:inherit}button{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--panel3);color:var(--text);font-weight:850;cursor:pointer}button:hover{border-color:var(--line2)}button:active{transform:translateY(1px)}button.primary{background:linear-gradient(135deg,var(--green),var(--lime));color:#031006;border-color:transparent}button.good{background:rgba(53,255,138,.18);border-color:rgba(53,255,138,.45)}button.warn{background:rgba(255,209,102,.16);border-color:rgba(255,209,102,.42)}button.danger{background:rgba(255,90,106,.16);border-color:rgba(255,90,106,.42)}button.ghost{background:transparent}button.small{padding:7px 9px;border-radius:10px;font-size:12px}button:disabled{opacity:.45;cursor:not-allowed}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#03100a;color:var(--text);padding:10px 11px;outline:none}textarea{min-height:90px;resize:vertical}label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.08em;margin-bottom:6px}
+    .shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.side{border-right:1px solid var(--line);background:rgba(4,16,11,.84);padding:18px;position:sticky;top:0;height:100vh}.logo{display:flex;gap:12px;align-items:center;margin-bottom:22px}.mark{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,var(--green),var(--lime));color:#031006;display:grid;place-items:center;font-weight:1000}.logo b{display:block;letter-spacing:.08em}.logo small{color:var(--muted);font-weight:800}.nav{display:grid;gap:9px}.nav button{display:flex;justify-content:space-between;align-items:center;text-align:left}.nav button.active{background:linear-gradient(135deg,rgba(53,255,138,.25),rgba(183,255,82,.14));border-color:var(--line2)}.system{margin-top:20px;border:1px solid var(--line);border-radius:var(--r);padding:12px;background:rgba(255,255,255,.035);color:var(--muted);font-size:13px;line-height:1.45}
+    .main{padding:18px 20px 100px}.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.eyebrow{color:var(--green);font-size:12px;font-weight:1000;letter-spacing:.12em;text-transform:uppercase}.top h1{font-size:34px;margin:3px 0}.sub{color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:12px 0 16px}.stat{border:1px solid var(--line);border-radius:16px;padding:12px;background:rgba(255,255,255,.035);box-shadow:var(--shadow)}.stat span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:900}.stat b{font-size:24px}.grid{display:grid;gap:14px}.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:repeat(3,1fr)}.card{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));box-shadow:var(--shadow)}.card h2,.card h3{margin:0 0 10px}.head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.hr{height:1px;background:var(--line);margin:12px 0}.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted);font-size:11px;font-weight:950;text-transform:uppercase}.badge.good{color:var(--green);border-color:rgba(53,255,138,.42)}.badge.warn{color:var(--amber);border-color:rgba(255,209,102,.42)}.badge.danger{color:var(--red);border-color:rgba(255,90,106,.45)}.badge.blue{color:var(--blue);border-color:rgba(112,215,255,.45)}
+    .wall{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(320px,.8fr);gap:14px}.tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}.table{border:1px solid rgba(53,255,138,.24);border-radius:18px;padding:12px;background:linear-gradient(150deg,rgba(53,255,138,.11),rgba(255,255,255,.025));position:relative;overflow:hidden}.table.done{opacity:.72}.table.disputed{border-color:rgba(255,90,106,.55)}.tableNo{position:absolute;right:12px;top:4px;font-size:56px;font-weight:1000;color:rgba(183,255,82,.12)}.playerLine{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px;margin:8px 0;background:rgba(0,0,0,.16)}.pname{font-size:18px;font-weight:950}.psub{font-size:12px;color:var(--muted);margin-top:2px}.scoreCtl{display:flex;gap:5px;align-items:center}.score{min-width:36px;text-align:center;font-size:24px;font-weight:1000}.list{display:grid;gap:8px}.item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px;background:rgba(255,255,255,.03)}.item.simple{grid-template-columns:1fr auto}.cardHeader{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}.cardHeader p{margin:3px 0 0;color:var(--muted)}.playerRow,.matchRow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px;margin:8px 0;background:rgba(255,255,255,.03)}.nameLine{font-weight:950}.subLine{font-size:12px;color:var(--muted);margin-top:2px}.notice{border:1px solid var(--line);border-radius:14px;padding:12px;background:rgba(255,255,255,.035);color:var(--muted)}.bracketCard{overflow:hidden}.bracketBoard{display:grid;gap:18px}.bracketDivision{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.14);padding:12px;overflow:hidden}.bracketDivisionTitle{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}.bracketRounds{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(270px,1fr);gap:30px;overflow-x:auto;padding:8px 6px 14px}.bracketRound{display:grid;gap:12px;align-content:start;min-width:270px}.bracketRound h4{margin:0;color:var(--green);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.bracketMatch{position:relative;border:1px solid rgba(82,255,155,.28);border-radius:12px;background:linear-gradient(180deg,rgba(53,255,138,.09),rgba(255,255,255,.025));padding:9px}.bracketRound:not(:last-child) .bracketMatch:after{content:"";position:absolute;right:-31px;top:50%;width:31px;border-top:2px solid rgba(183,255,82,.38)}.bracketSlot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:7px;margin:6px 0;background:rgba(0,0,0,.17)}.bracketSlot.win{border-color:rgba(53,255,138,.55);background:rgba(53,255,138,.12)}.bracketSlot.bye{opacity:.65}.bracketSeed{color:var(--muted);font-size:11px;font-weight:950;margin-right:6px}.bracketName{font-weight:950;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bracketScore{font-size:20px;font-weight:1000;min-width:28px;text-align:center}.bracketControls{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-top:8px}.bracketControls .scoreCtl{gap:4px}.bracketControls button{padding:6px 8px;font-size:11px;border-radius:9px}.moneyLine{display:grid;grid-template-columns:80px 1fr 100px 80px;gap:8px;align-items:center;margin:8px 0}.matrix{display:grid;gap:7px}.bracketCols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.roundCol{border:1px solid var(--line);border-radius:16px;padding:10px;background:rgba(0,0,0,.12)}.miniMatch{border:1px solid var(--line);border-radius:12px;padding:9px;margin:8px 0;background:rgba(255,255,255,.03)}.miniMatch b{display:block}.log{max-height:320px;overflow:auto}.directorBar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:1000;width:min(1120px,calc(100% - 16px));display:grid;grid-template-columns:repeat(10,1fr);gap:6px;padding:7px;border:1px solid var(--line2);border-radius:18px;background:rgba(3,12,8,.94);box-shadow:0 16px 60px rgba(0,0,0,.55)}.directorBar button{min-height:44px;padding:8px 6px;font-size:11px;border-radius:12px}.modalShade{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.76);display:flex;align-items:flex-end;justify-content:center;padding:12px}.modal{width:min(920px,100%);max-height:90vh;overflow:auto;border:1px solid var(--line2);border-radius:20px;background:#04100b;box-shadow:0 24px 90px rgba(0,0,0,.7);padding:14px}.tv{font-size:1.12rem}.tv .shell{display:block}.tv .side,.tv .actions .hideTv,.tv .directorBar{display:none}.tv .main{padding:22px}.tv .top h1{font-size:52px}.tv .wall{grid-template-columns:1fr}.tv .tables{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}.tv .table{min-height:250px}.tv .bracketRounds{grid-auto-columns:minmax(360px,1fr)}.fileInput{display:none}
+    @media(max-width:900px){.shell{grid-template-columns:1fr}.side{height:auto;position:static;border-right:0;border-bottom:1px solid var(--line)}.nav{grid-template-columns:repeat(3,1fr)}.wall,.grid.two,.grid.three{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.top{display:block}.actions{justify-content:flex-start}.moneyLine{grid-template-columns:1fr}.item{grid-template-columns:1fr}.main{padding:12px 12px 150px}.directorBar{grid-template-columns:repeat(3,1fr);bottom:6px}}
+  </style>
+  <style>
+    .status-strip{display:flex;align-items:center;gap:28px;padding:13px 17px;border:1px solid #1b2b23;background:#0b110e;border-radius:12px;color:#72847b;font-size:12px;overflow-x:auto}.status-strip span:first-child{color:#79ff91;font-weight:800}.status-strip i,.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#5cff79;box-shadow:0 0 12px #5cff79;margin-right:7px}.status-strip b{color:#fff}.bracket-stage{margin-top:16px;border:1px solid #203128;border-radius:16px;background:linear-gradient(140deg,#192f2352,#060c09f2);min-height:650px;padding:25px;position:relative;overflow:hidden}.bracket-stage:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(108,255,139,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(108,255,139,.025) 1px,transparent 1px);background-size:30px 30px;pointer-events:none}.bracket-grid{display:grid;grid-template-columns:minmax(360px,1fr) minmax(320px,.8fr) minmax(300px,.7fr);gap:70px;position:relative;max-width:1320px}.bracket-grid h3{font-size:11px;letter-spacing:.16em;color:#58e97a;margin:0 0 12px;text-transform:uppercase}.match{border:1px solid #2c4036;background:#0d1812eb;border-radius:10px;margin:12px 0 20px;max-width:410px;overflow:hidden;position:relative}.match:after{content:"";position:absolute;right:-71px;top:50%;width:70px;border-top:2px solid rgba(104,245,132,.32)}.bracket-grid>div:last-child .match:after{display:none}.match-label{height:26px;padding:7px 12px;color:#63ed7e;font-size:9px;letter-spacing:.12em;text-transform:uppercase}.match-player{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:10px 13px;border-top:1px solid #203028;font-size:14px}.match-player b{color:#6df289}.match-player.muted{color:#829088}.match-player.win{background:#102717;color:#eaffef}.match.live{border-color:#45ec79;box-shadow:0 0 24px #41ff7126}.next-round{padding-top:72px}.elimination-side{padding-left:18px;border-left:1px solid #173124}.score-dock{position:absolute;left:24px;right:24px;bottom:22px;border:1px solid #2b5138;background:#06100af0;backdrop-filter:blur(18px);border-radius:14px;padding:15px 17px;display:flex;justify-content:space-between;align-items:center;gap:14px}.score-dock>div:first-child{display:grid}.score-dock span{color:#68f083;font-size:10px;letter-spacing:.13em;font-weight:800}.score-dock b{font:600 18px Barlow Condensed,Inter,sans-serif;margin-top:5px}.score-dock em{font-style:normal;color:#7cff8b;font-size:24px;margin:0 12px}.score-actions{display:flex;gap:8px;flex-wrap:wrap}.score-actions button{display:flex;align-items:center;gap:7px;padding:10px 12px}.score-actions .primary{background:#8aff74;color:#061108;border-color:#a6ff98}.tv .bracket-stage{min-height:calc(100vh - 210px)}@media(max-width:1100px){.bracket-grid{grid-template-columns:1fr;gap:12px}.next-round{padding-top:0}.score-dock{position:static;margin-top:18px}.match:after{display:none}}
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <input id="backupFile" class="fileInput" type="file" accept=".json,application/json">
+  <script>
+    const KEY = "green_rack_runner_functional_v2";
+    const PLAYER_DB_KEY = "green_rack_runner_player_database_v1";
+    const SETUP_PRESETS_KEY = "green_rack_runner_setup_presets_v1";
+    const NOW = () => new Date().toISOString();
+    const MAX_HISTORY = 80;
+    const DEFAULT = {
+      version: 2, tab: "bracket", tv: false, phase: "setup",
+      tournament: { name: "", venue: "", director: "", date: "", format: "", pairingMode: "", seedMode: "", ratingEngine: "", ratingBase: "", ratingK: "", tables: "", raceTo: "", raceToFinal: "", breakRule: "", startedAt: "", finishedAt: "" },
+      bank: { buyIn: "", sidePot: "", added: "", paidPlaces: "", roundTo: "", pcts: ["","","","","","","",""] },
+      players: [], matches: [], rounds: [], eliminationOrder: [], log: [], history: [], nextPlayerId: 1, nextMatchId: 1
+    };
+    let S = loadState();
+    let DB = loadPlayerDb();
+    let PRESETS = loadSetupPresets();
+    const $ = id => document.getElementById(id);
+    const esc = v => String(v ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+    const clean = v => String(v || "").trim().replace(/\s+/g, " ");
+    const money = n => "$" + Number(n || 0).toLocaleString(undefined, {maximumFractionDigits:0});
+    const hasValue = v => v !== "" && v !== null && v !== undefined;
+    const num = v => hasValue(v) ? Number(v) : 0;
+    const shown = v => hasValue(v) ? esc(v) : "-";
+    const fallbackRatingBase = () => Number(S.tournament.ratingBase) || 500;
+    const fallbackRatingK = () => Number(S.tournament.ratingK) || 24;
+    function clone(v){ return JSON.parse(JSON.stringify(v)); }
+    function normalize(raw){
+      const s = Object.assign(clone(DEFAULT), raw || {});
+      s.tournament = Object.assign(clone(DEFAULT.tournament), (raw || {}).tournament || {});
+      s.bank = Object.assign(clone(DEFAULT.bank), (raw || {}).bank || {});
+      s.bank.pcts = Array.isArray(s.bank.pcts) ? s.bank.pcts.concat(DEFAULT.bank.pcts).slice(0,8) : DEFAULT.bank.pcts.slice();
+      ["players","matches","rounds","eliminationOrder","log","history"].forEach(k => { if(!Array.isArray(s[k])) s[k] = []; });
+      s.nextPlayerId = Math.max(Number(s.nextPlayerId || 1), 1 + s.players.reduce((m,p)=>Math.max(m, Number(p.id||0)), 0));
+      s.nextMatchId = Math.max(Number(s.nextMatchId || 1), 1 + s.matches.reduce((m,x)=>Math.max(m, Number(x.id||0)), 0));
+      stripOldPreloads(s);
+      return s;
+    }
+    function stripOldPreloads(s){
+      if(s.phase !== "setup" || (s.players||[]).some(p=>!p.removed) || (s.matches||[]).length) return;
+      const t=s.tournament, b=s.bank;
+      if(t.name==="Green Rack Runner") t.name="";
+      if(t.format==="double_elim") t.format="";
+      if(t.pairingMode==="balanced") t.pairingMode="";
+      if(t.seedMode==="manual") t.seedMode="";
+      if(t.ratingEngine==="local_elo") t.ratingEngine="";
+      if(Number(t.ratingBase)===500) t.ratingBase="";
+      if(Number(t.ratingK)===24) t.ratingK="";
+      if(Number(t.tables)===4) t.tables="";
+      if(Number(t.raceTo)===3) t.raceTo="";
+      if(Number(t.raceToFinal)===5) t.raceToFinal="";
+      if(t.breakRule==="Winner breaks") t.breakRule="";
+      if(Number(b.buyIn)===10 || Number(b.buyIn)===0) b.buyIn="";
+      if(Number(b.sidePot)===0) b.sidePot="";
+      if(Number(b.added)===0) b.added="";
+      if(Number(b.paidPlaces)===3) b.paidPlaces="";
+      if(Number(b.roundTo)===1) b.roundTo="";
+      if(Array.isArray(b.pcts) && b.pcts.map(Number).join(",")==="70,30,0,0,0,0,0,0") b.pcts=["","","","","","","",""];
+    }
+    function loadState(){ try { const raw = localStorage.getItem(KEY); if(raw) return normalize(JSON.parse(raw)); } catch(e){} return clone(DEFAULT); }
+    function loadPlayerDb(){ try { const raw = localStorage.getItem(PLAYER_DB_KEY); if(raw) return normalizePlayerDb(JSON.parse(raw)); } catch(e){} return normalizePlayerDb({}); }
+    function loadSetupPresets(){ try { const raw = localStorage.getItem(SETUP_PRESETS_KEY); if(raw) return normalizeSetupPresets(JSON.parse(raw)); } catch(e){} return []; }
+    function normalizeSetupPresets(raw){ return Array.isArray(raw) ? raw.filter(p=>p && p.name && p.params).map((p,i)=>Object.assign({id:p.id||("preset_"+Date.now()+"_"+i), createdAt:p.createdAt||NOW(), updatedAt:p.updatedAt||p.createdAt||NOW()}, p)) : []; }
+    function normalizePlayerDb(raw){ const db=Object.assign({version:1,nextId:1,players:[]}, raw || {}); if(!Array.isArray(db.players)) db.players=[]; db.players.forEach(r=>{ r.id=Number(r.id||0); r.name=clean(r.name); r.key=r.key||nameKey(r.name); r.rating=Number(r.rating)||500; r.matches=Number(r.matches||0); r.wins=Number(r.wins||0); r.losses=Number(r.losses||0); r.racksWon=Number(r.racksWon||0); r.racksLost=Number(r.racksLost||0); r.events=Number(r.events||0); r.peakRating=Number(r.peakRating||r.rating); r.createdAt=r.createdAt||NOW(); r.lastSeen=r.lastSeen||r.createdAt; }); db.nextId=Math.max(Number(db.nextId||1),1+db.players.reduce((m,r)=>Math.max(m,Number(r.id||0)),0)); return db; }
+    function save(){ localStorage.setItem(KEY, JSON.stringify(S)); scheduleSyncPush(); }
+    function savePlayerDb(){ localStorage.setItem(PLAYER_DB_KEY, JSON.stringify(DB)); scheduleSyncPush(); }
+    function saveSetupPresets(){ localStorage.setItem(SETUP_PRESETS_KEY, JSON.stringify(PRESETS)); scheduleSyncPush(); }
+    const SYNC_URL = location.protocol === "http:" || location.protocol === "https:" ? location.origin : "http://127.0.0.1:8765";
+    let SYNC_READY = !/^https?:/.test(location.protocol), SYNC_MUTED = false, SYNC_TIMER = null, SYNC_LAST = Number(S.syncUpdatedAt || 0);
+    function meaningfulState(){ return activePlayers().length || S.matches.length || S.tournament.name || S.tournament.venue || Number(S.bank.buyIn||0) || DB.players.length || PRESETS.length; }
+    function stampSync(){ S.syncUpdatedAt = Date.now(); SYNC_LAST = S.syncUpdatedAt; }
+    function scheduleSyncPush(){ if(SYNC_MUTED || !SYNC_READY) return; stampSync(); clearTimeout(SYNC_TIMER); SYNC_TIMER = setTimeout(pushSync, 200); }
+    async function pushSync(){ try{ await fetch(SYNC_URL+"/api/sync", { method:"POST", headers:{"content-type":"application/json"}, body:JSON.stringify({ updatedAt:SYNC_LAST, state:S, playerDb:DB, setupPresets:PRESETS }) }); }catch(e){} }
+    async function pullSync(first){ try{ const r=await fetch(SYNC_URL+"/api/sync?ts="+Date.now()); if(!r.ok) return; const data=await r.json(); if(data.hasState && Number(data.updatedAt||0) > Number(S.syncUpdatedAt||0)){ SYNC_MUTED=true; S=normalize(data.state); DB=normalizePlayerDb(data.playerDb||{}); PRESETS=normalizeSetupPresets(data.setupPresets||[]); localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(PLAYER_DB_KEY, JSON.stringify(DB)); localStorage.setItem(SETUP_PRESETS_KEY, JSON.stringify(PRESETS)); SYNC_LAST=Number(data.updatedAt||0); SYNC_MUTED=false; render(); } else if(first && !data.hasState && meaningfulState()){ SYNC_READY=true; pushSync(); } if(first) SYNC_READY=true; }catch(e){ if(first) SYNC_READY=true; } }
+    function startSync(){ pullSync(true); setInterval(()=>pullSync(false), 1200); }
+    function snapshot(label){ const copy = clone(S); copy.history = []; S.history.push({ label, at: NOW(), state: copy }); if(S.history.length > MAX_HISTORY) S.history.shift(); }
+    function log(type, text){ S.log.unshift({ at: NOW(), type, text }); S.log = S.log.slice(0,300); }
+    function player(id){ return S.players.find(p => Number(p.id) === Number(id)); }
+    function playerName(id){ const p = player(id); return p ? p.name : "Bye"; }
+    function nameKey(name){ return clean(name).toLowerCase().replace(/[^a-z0-9]+/g,""); }
+    function dbRecord(id){ return DB.players.find(r=>Number(r.id)===Number(id)); }
+    function dbFindByName(name){ const key=nameKey(name); return DB.players.find(r=>r.key===key || (Array.isArray(r.aliases) && r.aliases.map(nameKey).includes(key))); }
+    function rosterHasDb(id){ return S.players.some(p=>!p.removed && Number(p.dbId)===Number(id)); }
+    function dbRatingFor(name, fallback){ const rec=dbFindByName(name); const n=Number(fallback); return Number.isFinite(n) && n>0 ? n : rec ? Number(rec.rating||fallbackRatingBase()) : fallbackRatingBase(); }
+    function playerRating(p){ if(!p) return fallbackRatingBase(); const n=Number(p.rating); if(Number.isFinite(n) && n>0) return n; const rec=p.dbId ? dbRecord(p.dbId) : dbFindByName(p.name); return rec ? Number(rec.rating||fallbackRatingBase()) : fallbackRatingBase(); }
+    function ensurePlayerMemory(p){ if(!p || !p.name) return null; let rec=p.dbId ? dbRecord(p.dbId) : dbFindByName(p.name); if(!rec){ rec={id:DB.nextId++, name:p.name, key:nameKey(p.name), aliases:[], rating:dbRatingFor(p.name,p.rating), matches:0,wins:0,losses:0,racksWon:0,racksLost:0,events:0,peakRating:dbRatingFor(p.name,p.rating),createdAt:NOW(),lastSeen:NOW()}; DB.players.push(rec); } rec.name=rec.name || p.name; rec.key=rec.key || nameKey(rec.name); rec.lastSeen=NOW(); rec.rating=Number(rec.rating)||fallbackRatingBase(); rec.peakRating=Math.max(Number(rec.peakRating||rec.rating), rec.rating); p.dbId=rec.id; if(!p.rating) p.rating=Math.round(rec.rating); savePlayerDb(); return rec; }
+    function updatePlayerMemoryFromMatch(winner, loser, winnerScore, loserScore, ratingResult){ const wr=ensurePlayerMemory(winner), lr=ensurePlayerMemory(loser); if(!wr || !lr) return; wr.matches++; wr.wins++; wr.racksWon+=winnerScore; wr.racksLost+=loserScore; lr.matches++; lr.losses++; lr.racksWon+=loserScore; lr.racksLost+=winnerScore; [wr,lr].forEach(r=>{ r.events=Math.max(r.events||0,1); r.lastSeen=NOW(); }); if(ratingResult){ wr.rating=ratingResult.winnerAfter; lr.rating=ratingResult.loserAfter; wr.peakRating=Math.max(Number(wr.peakRating||wr.rating), wr.rating); lr.peakRating=Math.max(Number(lr.peakRating||lr.rating), lr.rating); winner.rating=wr.rating; loser.rating=lr.rating; winner.ratingDelta=ratingResult.delta; loser.ratingDelta=-ratingResult.delta; } savePlayerDb(); }
+    function ratingUpdate(winner, loser, winnerScore, loserScore, race){ if(!S.tournament.ratingEngine || S.tournament.ratingEngine==="off" || S.tournament.ratingEngine==="manual") return null; const rw=playerRating(winner), rl=playerRating(loser), expected=1/(1+Math.pow(10,(rl-rw)/400)); const k=Math.max(1,fallbackRatingK()); const margin=Math.min(1.6,1+(Math.max(1,winnerScore-loserScore)/Math.max(1,race))*0.35); const delta=Math.max(1,Math.round(k*margin*(1-expected))); return {winnerBefore:rw, loserBefore:rl, winnerAfter:Math.round(rw+delta), loserAfter:Math.max(1,Math.round(rl-delta)), delta}; }
+    function activePlayers(){ return S.players.filter(p => !p.removed && p.checkedIn !== false); }
+    function formatLabel(){ return ({double_elim:"Double Elimination",single_elim:"Single Elimination",round_robin:"Round Robin"}[S.tournament.format] || "Select Format"); }
+    function lossLimit(){ return S.tournament.format === "single_elim" ? 1 : S.tournament.format === "round_robin" ? Infinity : 2; }
+    function alivePlayers(){ const limit=lossLimit(); return activePlayers().filter(p => Number(p.losses||0) < limit); }
+    function openMatches(){ return S.matches.filter(m => !["done","bye"].includes(m.status)); }
+    function tableCount(){ return Math.max(1, Number(S.tournament.tables) || 1); }
+    function activeMatches(){ return openMatches().slice(0, tableCount()); }
+    function waitingMatches(){ return openMatches().slice(tableCount()); }
+    function totalPot(){ return activePlayers().length * (Number(S.bank.buyIn||0) + Number(S.bank.sidePot||0)) + Number(S.bank.added||0); }
+    function dueTotal(){ return activePlayers().filter(p=>!p.paid).length * (Number(S.bank.buyIn||0) + Number(S.bank.sidePot||0)); }
+    function standings(){ return activePlayers().slice().sort((a,b)=> S.tournament.format==="round_robin" ? (((b.wins||0)-(a.wins||0))||(((b.racksWon||0)-(b.racksLost||0))-((a.racksWon||0)-(a.racksLost||0)))||((b.racksWon||0)-(a.racksWon||0))||((a.losses||0)-(b.losses||0))||((a.seed||9999)-(b.seed||9999))||a.name.localeCompare(b.name)) : (((a.losses||0)-(b.losses||0))||((b.wins||0)-(a.wins||0))||(((b.racksWon||0)-(b.racksLost||0))-((a.racksWon||0)-(a.racksLost||0)))||((b.racksWon||0)-(a.racksWon||0))||((a.seed||9999)-(b.seed||9999))||a.name.localeCompare(b.name))); }
+    function phaseBadge(){ return S.phase === "setup" ? '<span class="badge warn">Setup</span>' : S.phase === "active" ? '<span class="badge good">Live</span>' : '<span class="badge blue">Complete</span>'; }
+    function render(){
+      save();
+      savePlayerDb();
+      saveSetupPresets();
+      document.body.classList.toggle("tv", !!S.tv);
+      const app = $("app");
+      app.innerHTML = `<div class="shell"><aside class="side"><div class="logo"><div class="mark">RR</div><div><b>GREEN RACK RUNNER</b><small>FUNCTIONAL V2</small></div></div><div class="nav">${navButton("bracket","Bracket",openMatches().length)}${navButton("players","Players",activePlayers().length)}${navButton("database","Database",DB.players.length)}${navButton("bank","Money",money(totalPot()))}${navButton("ledger","Ledger",S.matches.length)}${navButton("setup","Setup",S.phase)}${navButton("audit","Backup","")}</div><div class="system"><b>Offline desktop mode.</b><br>No fake server. No fake sync. Player memory and event data save locally on this Lenovo. Use Backup before and after live events.</div></aside><main class="main">${renderTop()}${renderStats()}${route()}</main></div>${directorBar()}<div id="modalHost"></div>`;
+    }
+    function directorBar(){ return `<div class="directorBar"><button class="primary" onclick="go('bracket')">BRACKET</button><button class="good" onclick="openMatchManager()">MATCHES</button><button class="good" onclick="openRosterManager()">PLAYERS</button><button class="primary" onclick="shuffleSeeds()">SHUFFLE</button><button onclick="reseedByRoster()">RESEED</button><button class="warn" onclick="copyDirectorReport()">REPORT</button><button onclick="saveCheckpoint()">SAVE</button><button class="good" onclick="exportBackup()">BACKUP</button><button class="warn" onclick="stopTournamentKeepSetup()">STOP</button><button class="danger" onclick="resetTournament()">ERASE</button></div>`; }
+    function navButton(id,label,count){ return `<button class="${S.tab===id?"active":""}" onclick="go('${id}')"><span>${label}</span><b>${esc(count)}</b></button>`; }
+    function renderTop(){ return `<div class="top"><div><span class="eyebrow">${esc(S.tournament.venue || "")}</span><h1>${esc(S.tournament.name || "Green Rack Runner")} ${phaseBadge()}</h1><div class="sub">${esc(S.tournament.date || "")} | ${formatLabel()} | ${activePlayers().length} players | Tables ${shown(S.tournament.tables)} | Race ${shown(S.tournament.raceTo)}</div></div><div class="actions"><button class="primary hideTv" onclick="S.tv=!S.tv;render()">TV View</button><button class="good hideTv" onclick="exportBackup()">Backup</button><button class="warn hideTv" onclick="undo()">Undo</button><button class="danger hideTv" onclick="resetTournament()">Erase</button><button class="ghost" onclick="S.tv=!S.tv;render()">${S.tv?"Exit TV":"Display"}</button></div></div>`; }
+    function renderStats(){ return `<div class="stats"><div class="stat"><span>Players</span><b>${activePlayers().length}</b></div><div class="stat"><span>Alive</span><b>${alivePlayers().length}</b></div><div class="stat"><span>Known</span><b>${DB.players.length}</b></div><div class="stat"><span>Open Matches</span><b>${openMatches().length}</b></div><div class="stat"><span>Pot</span><b>${money(totalPot())}</b></div><div class="stat"><span>Due</span><b>${money(dueTotal())}</b></div></div>`; }
+    function route(){ return ({bracket:renderBracket,players:renderPlayers,database:renderDatabase,bank:renderBank,ledger:renderLedger,setup:renderSetup,audit:renderAudit}[S.tab] || renderBracket)(); }
+    function go(tab){ S.tab = tab; render(); }
+    function renderBracket(){
+      const groups = {};
+      S.matches.forEach(m => { const key = `Round ${m.roundNo || 0} · ${m.division || "Matches"}`; (groups[key] ||= []).push(m); });
+      const buildLabel = S.tournament.format === "round_robin" ? "Close Event" : "Build Next";
+      return `${renderOriginalGreenBracket(buildLabel)}<div class="hr"></div><div class="grid two"><div class="card"><div class="cardHeader"><div><h2>Standings</h2><p>Sorted by live tournament position.</p></div><button class="ghost small" onclick="copyStandings()">Copy</button></div>${standings().length ? standings().map((p,i)=>`<div class="playerRow playerClickable" data-player-id="${p.id}"><span class="badge ${Number(p.losses||0)>=lossLimit()?"danger":Number(p.losses||0)===1?"warn":"good"}">#${i+1}</span><div><div class="nameLine">${esc(p.name)}</div><div class="subLine">${p.wins||0}W · ${p.losses||0}L · Byes ${p.byeCount||0}</div></div><span class="badge">${S.tournament.format==="round_robin"?"Ranked":Number(p.losses||0)>=lossLimit()?"Out":"Alive"}</span></div>`).join("") : `<div class="notice">No players yet.</div>`}</div><div class="card"><div class="cardHeader"><div><h2>Match Ledger</h2><p>All rounds, statuses, results, and disputes.</p></div><button class="primary small directorOnly" onclick="createNextRound(true)">${buildLabel}</button></div>${Object.keys(groups).length ? Object.keys(groups).map(k=>`<h3>${esc(k)}</h3>${groups[k].map(renderMatchRow).join("")}`).join("") : `<div class="notice">No matches yet.</div>`}</div></div>`;
+    }
+    function renderOriginalGreenBracket(buildLabel){
+      const live=activeMatches()[0] || openMatches()[0] || S.matches.find(m=>m.status!=="bye") || null;
+      const winners=S.matches.filter(m=>m.division==="Winners" || (!S.matches.some(x=>x.division==="Winners") && m.division!=="Losers")).slice().sort((a,b)=>(a.roundNo-b.roundNo)||(a.id-b.id));
+      const next=winners.filter(m=>Number(m.roundNo||0)>1).concat(S.matches.filter(m=>/final/i.test(m.division||""))).slice(0,4);
+      const losers=S.matches.filter(m=>m.division==="Losers" || m.division==="Round Robin").slice().sort((a,b)=>(a.roundNo-b.roundNo)||(a.id-b.id)).slice(0,5);
+      const firstCol=(winners.length?winners:S.matches).slice(0,8);
+      return `<div class="status-strip"><span><i></i>${S.phase==="active"?"LIVE":S.phase.toUpperCase()}</span><b>${esc(formatLabel())}</b><span>${activePlayers().length} Players</span><span>${tableCount()} Tables</span><span>${openMatches().length} Open</span><button class="good small" onclick="callAll()">Call All</button><button class="primary small directorOnly" onclick="createNextRound(true)">${buildLabel}</button></div><section class="bracket-stage"><div class="bracket-grid"><div><h3>Winner Side</h3>${firstCol.length?firstCol.map(renderGreenMatch).join(""):`<div class="notice">Start the tournament to build the bracket.</div>`}</div><div class="next-round"><h3>Next Round</h3>${next.length?next.map(renderGreenMatch).join(""):`<article class="match"><div class="match-label">Pending</div><div class="match-player"><span>Winner advances here</span><b>-</b></div><div class="match-player muted"><span>Build next after open matches</span><b>-</b></div></article>`}</div><div class="elimination-side"><h3>${S.tournament.format==="round_robin"?"Round Robin":"Elimination Side"}</h3>${losers.length?losers.map(renderGreenMatch).join(""):`<article class="match"><div class="match-label">Waiting</div><div class="match-player"><span>No elimination-side matches yet</span><b>-</b></div><div class="match-player muted"><span>They appear from real bracket state</span><b>-</b></div></article>`}</div></div>${renderScoreDock(live)}</section>`;
+    }
+    function renderGreenMatch(m){
+      const live=!["done","bye"].includes(m.status);
+      return `<article class="match ${live?"live":""}"><div class="match-label">${esc(m.label || (m.division+" Round "+m.roundNo))} · T${m.table||"-"}</div>${renderGreenPlayer(m,"A")}${renderGreenPlayer(m,"B")}</article>`;
+    }
+    function renderGreenPlayer(m,side){
+      const id=side==="A"?m.playerA:m.playerB, p=player(id), score=side==="A"?m.scoreA:m.scoreB, won=p&&Number(m.winner)===Number(p.id);
+      if(!p) return `<div class="match-player muted"><span>Bye</span><b>-</b></div>`;
+      return `<div class="match-player ${won?"win":""}"><span>${esc(p.name)}</span><b>${score||0}</b></div>`;
+    }
+    function renderScoreDock(m){
+      if(!m) return `<div class="score-dock"><div><span>BRACKET READY</span><b>No live match selected</b></div><div class="score-actions"><button class="primary" onclick="startTournament()">START</button><button onclick="undo()">UNDO</button></div></div>`;
+      const a=player(m.playerA), b=player(m.playerB);
+      return `<div class="score-dock"><div><span>TABLE ${m.table||"-"} · ${esc(statusText(m.status))}</span><b>${esc(playerName(m.playerA))} <em>${m.scoreA||0} - ${m.scoreB||0}</em> ${esc(playerName(m.playerB))}</b></div><div class="score-actions"><button onclick="adjustScore(${m.id},'A',-1)">A -</button><button onclick="adjustScore(${m.id},'A',1)">A +</button><button onclick="adjustScore(${m.id},'B',-1)">B -</button><button onclick="adjustScore(${m.id},'B',1)">B +</button>${a?`<button class="primary" onclick="recordWinner(${m.id},${a.id})">A WINS</button>`:""}${b?`<button class="primary" onclick="recordWinner(${m.id},${b.id})">B WINS</button>`:""}<button onclick="undo()">UNDO</button></div></div>`;
+    }
+    function renderBracketTree(){
+      if(!S.matches.length) return `<div class="notice">No matches yet.</div>`;
+      const divisions = Array.from(new Set(S.matches.map(m=>m.division || "Matches"))).sort((a,b)=>divisionRank(a)-divisionRank(b)||a.localeCompare(b));
+      return `<div class="bracketBoard">${divisions.map(renderBracketDivision).join("")}</div>`;
+    }
+    function divisionRank(d){ return ({Winners:1,Finals:2,Final:2,Losers:3,"Round Robin":4,Matches:5})[d] || 9; }
+    function renderBracketDivision(division){
+      const matches = S.matches.filter(m => (m.division || "Matches") === division).slice().sort((a,b)=>(Number(a.roundNo||0)-Number(b.roundNo||0))||(Number(a.id||0)-Number(b.id||0)));
+      const rounds = Array.from(new Set(matches.map(m=>Number(m.roundNo||0)))).sort((a,b)=>a-b);
+      return `<div class="bracketDivision"><div class="bracketDivisionTitle"><h3>${esc(division)}</h3><span class="badge">${matches.length}</span></div><div class="bracketRounds">${rounds.map((r,i)=>renderBracketRound(division,r,matches.filter(m=>Number(m.roundNo||0)===r),i)).join("")}</div></div>`;
+    }
+    function renderBracketRound(division, roundNo, matches, depth){
+      const spacer = depth ? Math.min(96, Math.pow(2, depth-1) * 22) : 0;
+      return `<div class="bracketRound"><h4>Round ${roundNo}</h4>${matches.map(m=>renderBracketNode(m,spacer)).join("")}</div>`;
+    }
+    function renderBracketNode(m, spacer){
+      const done = m.status === "done" || m.status === "bye";
+      return `<div class="bracketMatch ${done?"done":""}" style="margin-top:${spacer}px;margin-bottom:${spacer}px"><div class="row"><span class="badge ${statusBadgeClass(m.status)}">${esc(statusText(m.status))}</span><span class="badge">T${m.table || "-"}</span><span class="badge">M${m.id}</span></div>${renderBracketSlot(m,"A")}${renderBracketSlot(m,"B")}<div class="bracketControls"><button class="ghost small" onclick="openMatchModal(${m.id})">Open</button>${done?"":`<div class="row"><button class="small" onclick="setStatus(${m.id},'called')">Call</button><button class="good small" onclick="setStatus(${m.id},'on_table')">Table</button></div>`}</div></div>`;
+    }
+    function renderBracketSlot(m, side){
+      const id = side === "A" ? m.playerA : m.playerB;
+      const p = player(id);
+      const score = side === "A" ? Number(m.scoreA||0) : Number(m.scoreB||0);
+      const won = p && Number(m.winner) === Number(p.id);
+      if(!p) return `<div class="bracketSlot bye"><div><span class="bracketSeed">-</span><span class="bracketName">Bye</span></div><div class="bracketScore">-</div></div>`;
+      return `<div class="bracketSlot ${won?"win":""}"><div><span class="bracketSeed">${esc(p.seed || "-")}</span><span class="bracketName">${esc(p.name)}</span></div><div class="bracketScore">${score}</div>${m.status==="done"||m.status==="bye"?"":`<div class="bracketControls"><div class="scoreCtl"><button onclick="adjustScore(${m.id},'${side}',-1)">-</button><button onclick="adjustScore(${m.id},'${side}',1)">+</button></div><button class="primary" onclick="recordWinner(${m.id},${p.id})">Win</button></div>`}</div>`;
+    }
+    function previewPairs(){
+      const entrants=seedOrder(activePlayers());
+      const rows=[];
+      const pool=entrants.slice();
+      if(pool.length%2===1){ const bye=pool.shift(); if(bye) rows.push({playerA:bye.id,playerB:null,label:"Opening Bye",status:"preview"}); }
+      if(S.tournament.pairingMode==="random_draw") pool.sort((a,b)=>a.id-b.id);
+      while(pool.length>=2){ const a=pool.shift(), b=S.tournament.pairingMode==="adjacent" ? pool.shift() : pool.pop(); rows.push({playerA:a.id,playerB:b.id,label:"Opening Match",status:"preview"}); }
+      return rows;
+    }
+    function renderSetupBracketBoard(){
+      return renderBracket();
+    }
+    function renderTable(m){
+      return `<article class="table ${m.status}"><div class="tableNo">${m.table || "-"}</div><span class="badge good">Table ${m.table || "-"}</span> <span class="badge">${esc(m.division)}</span> <span class="badge ${m.status==="disputed"?"danger":"blue"}">${esc(statusText(m.status))}</span><h3>${esc(m.label || ("Match " + m.id))}</h3>${playerBlock(m,"A")}${playerBlock(m,"B")}<div class="row"><button onclick="setStatus(${m.id},'called')">Call</button><button class="good" onclick="setStatus(${m.id},'on_table')">On Table</button><button class="danger" onclick="setStatus(${m.id},'disputed')">Dispute</button></div></article>`;
+    }
+    function playerBlock(m, side){
+      const pid = side === "A" ? m.playerA : m.playerB, p = player(pid);
+      if(!p) return `<div class="playerLine"><div><div class="pname">Bye</div><div class="psub">Automatic advance</div></div></div>`;
+      const score = side === "A" ? m.scoreA : m.scoreB;
+      return `<div class="playerLine"><div><div class="pname">${esc(p.name)}</div><div class="psub">${p.wins||0}W / ${p.losses||0}L | Rating ${Math.round(playerRating(p))}${p.ratingDelta?` (${p.ratingDelta>0?"+":""}${p.ratingDelta})`:""} | Racks ${p.racksWon||0}-${p.racksLost||0}</div></div><div class="scoreCtl"><button class="small" onclick="adjustScore(${m.id},'${side}',-1)">-</button><div class="score">${score||0}</div><button class="small" onclick="adjustScore(${m.id},'${side}',1)">+</button><button class="primary small" onclick="recordWinner(${m.id},${p.id})">Win</button></div></div>`;
+    }
+    function renderOnDeck(m){ return `<div class="item simple"><div><b>${esc(playerName(m.playerA))} vs ${esc(playerName(m.playerB))}</b><div class="sub">${esc(m.label)} | Race ${m.raceTo}</div></div><button class="primary small" onclick="setStatus(${m.id},'called')">Call</button></div>`; }
+    function renderStanding(p,i){ const diff=(p.racksWon||0)-(p.racksLost||0), out=Number(p.losses||0)>=lossLimit(); return `<div class="item"><span class="badge ${out?"danger":p.losses===1?"warn":"good"}">#${i+1}</span><div><b>${esc(p.name)}</b><div class="sub">${p.wins||0}W / ${p.losses||0}L | Rating ${Math.round(playerRating(p))} | Byes ${p.byeCount||0} | Rack diff ${diff}</div></div><span class="badge">${S.tournament.format==="round_robin"?"Ranked":out?"Out":"Alive"}</span></div>`; }
+    function statusBadgeClass(st){ return ({ready:"",called:"blue",on_table:"good",hill_hill:"warn",disputed:"danger",done:"good",bye:"good"})[st] || ""; }
+    function renderMatchRow(m){ const winner=m.winner ? `Winner: ${playerName(m.winner)}` : statusText(m.status); return `<div class="matchRow"><span class="badge ${statusBadgeClass(m.status)}">${esc(statusText(m.status))}</span><div><div class="nameLine">${esc(playerName(m.playerA))} vs ${esc(playerName(m.playerB))}</div><div class="subLine">${esc(m.label)} · Table ${m.table || "-"} · ${esc(winner)} ${m.notes ? " · Note: " + esc(m.notes) : ""}</div></div><button class="ghost small directorOnly" onclick="openMatchModal(${m.id})">Open</button></div>`; }
+    function renderBracketColumns(){
+      const groups = {};
+      S.matches.forEach(m => { const k = `Round ${m.roundNo || 0} - ${m.division || "Matches"}`; (groups[k] ||= []).push(m); });
+      return `<section class="card"><div class="head"><h2>Match Ledger Bracket</h2><span class="badge">${S.matches.length}</span></div><div class="bracketCols">${Object.keys(groups).length ? Object.keys(groups).map(k=>`<div class="roundCol"><h3>${esc(k)}</h3>${groups[k].map(m=>`<div class="miniMatch"><b>${esc(playerName(m.playerA))} vs ${esc(playerName(m.playerB))}</b><div class="sub">${statusText(m.status)} | ${m.scoreA||0}-${m.scoreB||0} ${m.winner ? "| Winner: "+esc(playerName(m.winner)) : ""}</div></div>`).join("")}</div>`).join("") : '<div class="sub">No matches yet.</div>'}</div></section>`;
+    }
+    function renderPlayers(){
+      return `<div class="grid two"><section class="card"><h2>Player Desk</h2><div class="grid two"><div><label>Name</label><input id="pName"></div><div><label>Rating / Fargo / Skill</label><input id="pRating"></div><div><label>Phone / Contact</label><input id="pPhone"></div><div><label>Seed</label><input id="pSeed" type="number" placeholder="Auto"></div></div><div class="hr"></div><button class="primary" onclick="addPlayerFromForm()">Add Player</button><div class="hr"></div>${renderEventPlayerPicker()}<div class="hr"></div><label>Bulk Add</label><textarea id="bulkPlayers" placeholder="One player per line"></textarea><div class="row"><button class="good" onclick="bulkAdd()">Add List</button><button onclick="markAllPaid()">Mark All Paid</button><button onclick="checkAllIn()">Check All In</button></div><div class="hr"></div><div class="row"><button class="primary" onclick="shuffleSeeds()">Shuffle Players</button><button onclick="reseedByRoster()">Reset Seeds</button><button class="good" onclick="startTournament()">Start Tournament</button></div><div class="sub">Shuffle before starting so seed 1 is not forced into seed 2. Balanced pairing uses top seed vs bottom seed.</div></section><section class="card"><div class="head"><h2>Roster</h2><span class="badge">${activePlayers().length}</span></div><div class="list">${S.players.filter(p=>!p.removed).map(renderPlayer).join("") || '<div class="sub">No players yet.</div>'}</div></section></div>`;
+    }
+    function renderPlayer(p){ const rec=p.dbId?dbRecord(p.dbId):dbFindByName(p.name); return `<div class="item"><span class="badge ${p.paid?"good":"warn"}">${p.paid?"Paid":"Due"}</span><div><b>${esc(p.name)}</b><div class="sub">${p.checkedIn===false?"Not checked in":"Checked in"} | Rating ${Math.round(playerRating(p))} | Event ${p.wins||0}W/${p.losses||0}L${rec?` | Lifetime ${rec.wins||0}-${rec.losses||0}`:""}</div></div><div class="row"><button class="small" onclick="togglePlayer(${p.id},'paid')">${p.paid?"Due":"Paid"}</button><button class="small" onclick="togglePlayer(${p.id},'checkedIn')">${p.checkedIn===false?"In":"Out"}</button><button class="danger small" onclick="removePlayer(${p.id})">Remove</button></div></div>`; }
+    function knownPlayerRows(q){ return DB.players.slice().filter(r=>!q || r.name.toLowerCase().includes(q.toLowerCase())).sort((a,b)=>(b.rating-a.rating)||((b.wins||0)-(a.wins||0))||a.name.localeCompare(b.name)); }
+    function renderEventPlayerPicker(){ const q=clean($("eventPlayerSearch") ? $("eventPlayerSearch").value : ""); const rows=knownPlayerRows(q).slice(0,12); return `<div><label>Add From Player Database</label><input id="eventPlayerSearch" value="${esc(q)}" oninput="render()" placeholder="Search saved player database"><div class="list">${rows.length ? rows.map(renderDbRecord).join("") : '<div class="sub">No matching saved players.</div>'}</div></div>`; }
+    function renderDatabase(){ const q=clean($("dbSearch") ? $("dbSearch").value : ""); const rows=knownPlayerRows(q); return `<div class="grid two"><section class="card"><h2>Player Memory</h2><div class="grid two"><div><label>Find Known Player</label><input id="dbSearch" value="${esc(q)}" oninput="render()" placeholder="Search saved names"></div><div><label>Manual Database Entry</label><input id="dbNewName" placeholder="Name"></div><div><label>Starting Rating</label><input id="dbNewRating" type="number" placeholder="${esc(S.tournament.ratingBase)}"></div><div><label>Rating Engine</label><select onchange="setTournament('ratingEngine',this.value)"><option value="" ${!S.tournament.ratingEngine?"selected":""}></option><option value="local_elo" ${S.tournament.ratingEngine==="local_elo"?"selected":""}>Local Elo</option><option value="manual" ${S.tournament.ratingEngine==="manual"?"selected":""}>Manual / Static</option><option value="off" ${S.tournament.ratingEngine==="off"?"selected":""}>Off</option></select></div></div><div class="hr"></div><button class="primary" onclick="createDbPlayer()">Save Player</button> <button class="good" onclick="syncRosterMemory()">Sync Current Roster</button></section><section class="card"><div class="head"><h2>Known Players</h2><span class="badge">${rows.length}</span></div><div class="list">${rows.map(renderDbRecord).join("") || '<div class="sub">No saved player memory yet.</div>'}</div></section></div>`; }
+    function renderDbRecord(r){ const diff=(r.racksWon||0)-(r.racksLost||0), inRoster=rosterHasDb(r.id); return `<div class="item"><span class="badge ${inRoster?"warn":"good"}">${Math.round(r.rating||fallbackRatingBase())}</span><div><b>${esc(r.name)}</b><div class="sub">${r.wins||0}W/${r.losses||0}L | Matches ${r.matches||0} | Rack diff ${diff} | Peak ${Math.round(r.peakRating||r.rating||0)}</div></div><button class="primary small" ${inRoster?"disabled":""} onclick="addKnownPlayer(${r.id})">${inRoster?"Added":"Add"}</button></div>`; }
+    function renderBank(){
+      const payouts = calcPayouts();
+      return `<div class="grid two"><section class="card"><h2>Money Ledger</h2><div class="grid two"><div><label>Buy-In</label><input type="number" value="${esc(S.bank.buyIn)}" onchange="setBank('buyIn',this.value)"></div><div><label>Side Pot / Player</label><input type="number" value="${esc(S.bank.sidePot)}" onchange="setBank('sidePot',this.value)"></div><div><label>Added Money</label><input type="number" value="${esc(S.bank.added)}" onchange="setBank('added',this.value)"></div><div><label>Entry Count Rule</label><input value="${esc(payoutRuleText())}" disabled></div></div><div class="hr"></div><div class="stats"><div class="stat"><span>Total Pot</span><b>${money(totalPot())}</b></div><div class="stat"><span>Collected</span><b>${money(activePlayers().filter(p=>p.paid).length*(Number(S.bank.buyIn||0)+Number(S.bank.sidePot||0)))}</b></div><div class="stat"><span>Due</span><b>${money(dueTotal())}</b></div></div></section><section class="card"><h2>Payouts</h2>${payouts.map((p,i)=>`<div class="moneyLine"><b>${p.place}</b><input placeholder="${esc(p.place)}" value="${esc(p.name||"")}" onchange="setPayoutName(${i},this.value)"><input type="number" value="${p.locked?"":esc(S.bank.pcts[i]||"")}" ${p.locked?"disabled":""} onchange="setPct(${i},this.value)"><b>${money(p.amount)}</b></div>`).join("")}<div class="sub">${esc(payoutRuleText())}. For 10+ players, 3rd gets entry fee back first; 1st and 2nd split the remainder using the first two percentages.</div></section></div>`;
+    }
+    function renderLedger(){ return `<section class="card"><div class="head"><h2>Completed And Open Matches</h2><button class="primary" onclick="createNextRound(true)">Build Next</button></div><div class="list">${S.matches.map(m=>`<div class="item"><span class="badge ${m.status==="done"?"good":m.status==="disputed"?"danger":"blue"}">${statusText(m.status)}</span><div><b>${esc(playerName(m.playerA))} vs ${esc(playerName(m.playerB))}</b><div class="sub">${esc(m.label)} | Table ${m.table||"-"} | ${m.scoreA||0}-${m.scoreB||0} ${m.winner?"| Winner: "+esc(playerName(m.winner)):""}</div></div><button class="small" onclick="S.tab='bracket';render()">Board</button></div>`).join("") || '<div class="sub">No matches yet.</div>'}</div><div class="hr"></div><h3>Recent Actions</h3><div class="log">${S.log.map(l=>`<div class="item simple"><div><b>${esc(l.type)}</b><div class="sub">${esc(new Date(l.at).toLocaleString())} | ${esc(l.text)}</div></div></div>`).join("")}</div></section>`; }
+    function renderSetup(){ return `<div class="grid two"><section class="card"><h2>Tournament Setup</h2><div class="grid two"><div><label>Name</label><input value="${esc(S.tournament.name)}" onchange="setTournament('name',this.value)"></div><div><label>Venue</label><input value="${esc(S.tournament.venue)}" onchange="setTournament('venue',this.value)"></div><div><label>Director</label><input value="${esc(S.tournament.director)}" onchange="setTournament('director',this.value)"></div><div><label>Date</label><input type="date" value="${esc(S.tournament.date)}" onchange="setTournament('date',this.value)"></div><div><label>Format</label><select onchange="setTournament('format',this.value)"><option value="" ${!S.tournament.format?"selected":""}></option><option value="double_elim" ${S.tournament.format==="double_elim"?"selected":""}>Double Elimination</option><option value="single_elim" ${S.tournament.format==="single_elim"?"selected":""}>Single Elimination</option><option value="round_robin" ${S.tournament.format==="round_robin"?"selected":""}>Round Robin</option></select></div><div><label>Pairing / Draw</label><select onchange="setTournament('pairingMode',this.value)"><option value="" ${!S.tournament.pairingMode?"selected":""}></option><option value="balanced" ${S.tournament.pairingMode==="balanced"?"selected":""}>Balanced Seed Split</option><option value="adjacent" ${S.tournament.pairingMode==="adjacent"?"selected":""}>Adjacent Seeds</option><option value="random_draw" ${S.tournament.pairingMode==="random_draw"?"selected":""}>Random Draw</option></select></div><div><label>Seeding</label><select onchange="setTournament('seedMode',this.value)"><option value="" ${!S.tournament.seedMode?"selected":""}></option><option value="manual" ${S.tournament.seedMode==="manual"?"selected":""}>Manual Seed</option><option value="rating" ${S.tournament.seedMode==="rating"?"selected":""}>Rating Seed</option><option value="entry" ${S.tournament.seedMode==="entry"?"selected":""}>Entry Order</option></select></div><div><label>Rating Engine</label><select onchange="setTournament('ratingEngine',this.value)"><option value="" ${!S.tournament.ratingEngine?"selected":""}></option><option value="local_elo" ${S.tournament.ratingEngine==="local_elo"?"selected":""}>Local Elo</option><option value="manual" ${S.tournament.ratingEngine==="manual"?"selected":""}>Manual / Static</option><option value="off" ${S.tournament.ratingEngine==="off"?"selected":""}>Off</option></select></div><div><label>Base Rating</label><input type="number" min="1" max="9999" value="${esc(S.tournament.ratingBase)}" onchange="setTournament('ratingBase',this.value)"></div><div><label>Rating K</label><input type="number" min="1" max="100" value="${esc(S.tournament.ratingK)}" onchange="setTournament('ratingK',this.value)"></div><div><label>Tables</label><input type="number" min="1" max="32" value="${esc(S.tournament.tables)}" onchange="setTournament('tables',this.value)"></div><div><label>Race To</label><input type="number" min="1" max="99" value="${esc(S.tournament.raceTo)}" onchange="setTournament('raceTo',this.value)"></div><div><label>Final Race To</label><input type="number" min="1" max="99" value="${esc(S.tournament.raceToFinal)}" onchange="setTournament('raceToFinal',this.value)"></div><div><label>Break Rule</label><input value="${esc(S.tournament.breakRule)}" onchange="setTournament('breakRule',this.value)"></div></div><div class="hr"></div><button class="primary" onclick="startTournament()">Start / Resume</button> <button class="warn" onclick="reopenSetup()">Stop / Reopen Setup</button> <button class="danger" onclick="resetTournament()">Erase Tournament</button></section><section class="card"><h2>Saved Event Setups</h2>${renderSetupPresets()}<div class="hr"></div><h2>Format Math</h2><div class="list">${formatMath()}</div><div class="hr"></div>${checklist()}</section></div>`; }
+    function renderAudit(){ return `<div class="grid two"><section class="card"><h2>Backup / Restore</h2><p class="sub">Use backup before and after a live tournament. JSON backups include event state and player memory.</p><div class="row"><button class="primary" onclick="exportBackup()">Download JSON Backup</button><button onclick="$('backupFile').click()">Import Backup</button><button onclick="exportCSV()">Export Event CSV</button><button onclick="exportPlayerDbCSV()">Export Player DB CSV</button><button onclick="window.print()">Print</button></div></section><section class="card"><h2>Safety</h2><div class="list"><div class="item simple"><b>One scoring path</b><span class="badge good">On</span></div><div class="item simple"><b>Offline local save</b><span class="badge good">On</span></div><div class="item simple"><b>Player memory</b><span class="badge good">${DB.players.length}</span></div><div class="item simple"><b>Backup validation</b><span class="badge good">On</span></div></div></section></div>`; }
+    function renderSetupPresets(){ return `<div class="grid"><div><label>Preset Name</label><input id="setupPresetName" placeholder="Save current setup as"></div><label><input id="setupPresetIncludePlayers" type="checkbox" style="width:auto"> Include current roster from player database</label><button class="primary" onclick="saveCurrentSetupPreset()">Save Current Setup</button><div class="list">${PRESETS.length ? PRESETS.map(renderSetupPresetRow).join("") : '<div class="sub">No saved setup presets yet.</div>'}</div></div>`; }
+    function renderSetupPresetRow(p){ const playerCount=(p.params.playerDbIds||[]).length; return `<div class="item"><span class="badge good">${esc(p.name)}</span><div><b>${esc(p.params.venue || p.params.name || p.name)}</b><div class="sub">${esc(({double_elim:"Double Elim",single_elim:"Single Elim",round_robin:"Round Robin"}[p.params.format] || "") )} | Tables ${esc(p.params.tables || "-")} | Race ${esc(p.params.raceTo || "-")} | Buy-in ${money(p.params.buyIn || 0)} | Saved players ${playerCount}</div></div><div class="row"><button class="small primary" onclick="applySetupPreset('${esc(p.id)}')">Load</button><button class="small danger" onclick="deleteSetupPreset('${esc(p.id)}')">Delete</button></div></div>`; }
+    function currentSetupParams(includePlayers){ return { name:S.tournament.name, venue:S.tournament.venue, director:S.tournament.director, format:S.tournament.format, pairingMode:S.tournament.pairingMode, seedMode:S.tournament.seedMode, ratingEngine:S.tournament.ratingEngine, ratingBase:S.tournament.ratingBase, ratingK:S.tournament.ratingK, tables:S.tournament.tables, raceTo:S.tournament.raceTo, raceToFinal:S.tournament.raceToFinal, breakRule:S.tournament.breakRule, buyIn:S.bank.buyIn, sidePot:S.bank.sidePot, added:S.bank.added, pcts:Array.isArray(S.bank.pcts)?S.bank.pcts.slice(0,8):["","","","","","","",""], roundTo:S.bank.roundTo, playerDbIds:includePlayers ? activePlayers().map(ensurePlayerMemory).filter(Boolean).map(r=>r.id) : [] }; }
+    function saveCurrentSetupPreset(){ const input=$("setupPresetName"), name=clean(input && input.value); if(!name) return alert("Name this setup preset first."); const include=!!($("setupPresetIncludePlayers") && $("setupPresetIncludePlayers").checked); const params=currentSetupParams(include); const existing=PRESETS.find(p=>p.name.toLowerCase()===name.toLowerCase()); if(existing){ existing.params=params; existing.updatedAt=NOW(); } else PRESETS.push({id:"preset_"+Date.now(), name, params, createdAt:NOW(), updatedAt:NOW()}); saveSetupPresets(); log("preset","Saved setup preset "+name); render(); }
+    function applySetupPreset(id){ const p=PRESETS.find(x=>x.id===id); if(!p) return; snapshot("Load setup preset"); S.phase="setup"; S.matches=[]; S.rounds=[]; S.eliminationOrder=[]; Object.assign(S.tournament, { name:p.params.name||"", venue:p.params.venue||"", director:p.params.director||"", format:p.params.format||"", pairingMode:p.params.pairingMode||"", seedMode:p.params.seedMode||"", ratingEngine:p.params.ratingEngine||"", ratingBase:p.params.ratingBase||"", ratingK:p.params.ratingK||"", tables:p.params.tables||"", raceTo:p.params.raceTo||"", raceToFinal:p.params.raceToFinal||"", breakRule:p.params.breakRule||"", startedAt:"", finishedAt:"" }); Object.assign(S.bank, { buyIn:p.params.buyIn||"", sidePot:p.params.sidePot||"", added:p.params.added||"", pcts:Array.isArray(p.params.pcts)?p.params.pcts.slice(0,8):["","","","","","","",""], roundTo:p.params.roundTo||"" }); if(Array.isArray(p.params.playerDbIds) && p.params.playerDbIds.length){ S.players=[]; S.nextPlayerId=1; p.params.playerDbIds.forEach(id=>{ const rec=dbRecord(id); if(rec) S.players.push(buildPlayer({dbId:rec.id,name:rec.name,rating:Math.round(rec.rating)})); }); } log("preset","Loaded setup preset "+p.name); render(); }
+    function deleteSetupPreset(id){ const p=PRESETS.find(x=>x.id===id); if(!p) return; PRESETS=PRESETS.filter(x=>x.id!==id); saveSetupPresets(); log("preset","Deleted setup preset "+p.name); render(); }
+    function formatMath(){ const n=activePlayers().length, fmt=S.tournament.format, matches=!fmt ? "-" : fmt==="round_robin" ? n*(n-1)/2 : fmt==="single_elim" ? Math.max(0,n-1) : Math.max(0,(2*n)-2), maxLoss=!fmt ? "choose format" : fmt==="single_elim" ? "1 loss" : fmt==="double_elim" ? "2 losses" : "ranked by wins and rack diff"; return `<div class="item simple"><b>${formatLabel()}</b><span class="badge ${fmt?"good":"warn"}">${esc(maxLoss)}</span></div><div class="item simple"><b>Projected Matches</b><span class="badge">${matches}</span></div><div class="item simple"><b>Rating Engine</b><span class="badge blue">${esc(S.tournament.ratingEngine || "-")} / K ${esc(S.tournament.ratingK||"-")}</span></div><div class="item simple"><b>Seeding</b><span class="badge blue">${esc(S.tournament.seedMode || "-")}</span></div>`; }
+    function checklist(){ const items = [[activePlayers().length>=2,"At least 2 active players"],[!!S.tournament.format,"Format selected"],[!!S.tournament.pairingMode,"Pairing selected"],[Number(S.tournament.tables)>=1,"Tables set"],[Number(S.tournament.raceTo)>=1,"Race length set"],[true,"Backup/export available"],[true,"Offline desktop mode"]]; return `<div class="list">${items.map(x=>`<div class="item simple"><b>${esc(x[1])}</b><span class="badge ${x[0]?"good":"warn"}">${x[0]?"OK":"Check"}</span></div>`).join("")}</div>`; }
+    function statusText(s){ return ({ready:"Ready",called:"Called",on_table:"On Table",disputed:"Disputed",hill_hill:"Hill-Hill",done:"Done",bye:"Bye"}[s] || s || "Ready"); }
+    function setTournament(k,v){ snapshot("Set tournament"); S.tournament[k] = ["tables","raceTo","raceToFinal","ratingBase","ratingK"].includes(k) ? (String(v).trim()==="" ? "" : Math.max(1, Number(v||1))) : clean(v); render(); }
+    function setBank(k,v){ snapshot("Set bank"); S.bank[k] = String(v).trim()==="" ? "" : Number(v||0); if(k==="paidPlaces" && S.bank[k] !== "") S.bank[k] = Math.max(1, Math.min(8, S.bank[k])); render(); }
+    function setPct(i,v){ snapshot("Set payout percent"); S.bank.pcts[i] = String(v).trim()==="" ? "" : Math.max(0, Number(v||0)); render(); }
+    function setPayoutName(i,v){ S.bank.names = S.bank.names || []; S.bank.names[i] = clean(v); save(); }
+    function quickAdd(paid){ const name = clean($("quickName").value); if(!name) return alert("Enter a player name."); addPlayer({name, paid}); }
+    function addPlayerFromForm(){ addPlayer({ name:$("pName").value, rating:$("pRating").value, phone:$("pPhone").value, seed:$("pSeed").value }); }
+    function buildPlayer(data){
+      const name=clean(data.name), rec=data.dbId ? dbRecord(data.dbId) : dbFindByName(name), rating=clean(data.rating) || (rec ? Math.round(rec.rating) : "");
+      const p={ id:S.nextPlayerId++, dbId:rec?rec.id:null, name, rating, phone:clean(data.phone), seed:data.seed?Number(data.seed):S.players.length+1, paid:!!data.paid, checkedIn:true, removed:false, wins:0, losses:0, byeCount:0, racksWon:0, racksLost:0, ratingDelta:0, createdAt:NOW() };
+      ensurePlayerMemory(p); return p;
+    }
+    function addPlayer(data){
+      const name = clean(data.name); if(!name) return alert("Enter a player name.");
+      const rec=data.dbId ? dbRecord(data.dbId) : dbFindByName(name);
+      if(rec && rosterHasDb(rec.id)) return alert("That saved player is already in this event.");
+      if(S.players.some(p=>!p.removed && p.name.toLowerCase()===name.toLowerCase())) return alert("That player is already entered.");
+      snapshot("Add player");
+      S.players.push(buildPlayer(Object.assign({}, data, {dbId:rec?rec.id:data.dbId})));
+      log("player","Added "+name); S.tab = S.phase === "setup" ? S.tab : "players"; render();
+    }
+    function bulkAdd(){ const lines = $("bulkPlayers").value.split(/\r?\n/).map(clean).filter(Boolean); lines.forEach(name=>{ if(!S.players.some(p=>!p.removed && p.name.toLowerCase()===name.toLowerCase())) S.players.push(buildPlayer({name})); }); log("player","Bulk added "+lines.length+" players"); render(); }
+    function createDbPlayer(){ const name=clean($("dbNewName").value), rating=Number($("dbNewRating").value||S.tournament.ratingBase); if(!name) return alert("Enter a player name."); let rec=dbFindByName(name); if(!rec){ rec={id:DB.nextId++,name,key:nameKey(name),aliases:[],rating,matches:0,wins:0,losses:0,racksWon:0,racksLost:0,events:0,peakRating:rating,createdAt:NOW(),lastSeen:NOW()}; DB.players.push(rec); } else { rec.rating=rating; rec.peakRating=Math.max(Number(rec.peakRating||rating),rating); rec.lastSeen=NOW(); } savePlayerDb(); render(); }
+    function addKnownPlayer(id){ const rec=dbRecord(id); if(!rec) return; addPlayer({dbId:rec.id, name:rec.name, rating:Math.round(rec.rating), paid:false}); }
+    function syncRosterMemory(){ snapshot("Sync player memory"); activePlayers().forEach(ensurePlayerMemory); log("memory","Synced "+activePlayers().length+" roster players to player database"); render(); }
+    function togglePlayer(id,field){ const p=player(id); if(!p) return; snapshot("Toggle player"); p[field]=!p[field]; render(); }
+    function removePlayer(id){ const p=player(id); if(!p) return; snapshot("Remove player"); p.removed=true; log("player","Removed "+p.name); render(); }
+    function markAllPaid(){ snapshot("Mark all paid"); activePlayers().forEach(p=>p.paid=true); render(); }
+    function checkAllIn(){ snapshot("Check all in"); S.players.filter(p=>!p.removed).forEach(p=>p.checkedIn=true); render(); }
+    function playedMatches(){ return S.matches.filter(m=>m.status==="done" && m.playerB); }
+    function resetEventStats(){ activePlayers().forEach((p,i)=>{ p.wins=0;p.losses=0;p.byeCount=0;p.racksWon=0;p.racksLost=0;p.ratingDelta=0;p.seed=p.seed||i+1; }); }
+    function rebuildCurrentBracket(label){
+      if(S.phase==="setup") return render();
+      if(playedMatches().length) return alert("Shuffle is locked after a real match is scored. Use Undo or Erase Tournament first.");
+      snapshot(label || "Rebuild bracket");
+      S.matches=[]; S.rounds=[]; S.eliminationOrder=[]; S.nextMatchId=1; S.tournament.finishedAt="";
+      resetEventStats(); S.phase="active"; S.tab="bracket"; createNextRound(false);
+    }
+    function shuffleSeeds(){
+      if(activePlayers().length < 2) return alert("Add at least two players before shuffle.");
+      if(playedMatches().length) return alert("Shuffle is locked after a real match is scored. Use Undo or Erase Tournament first.");
+      snapshot("Shuffle seeds");
+      const shuffled=shuffle(activePlayers());
+      shuffled.forEach((p,i)=>{ p.seed=i+1; });
+      S.tournament.seedMode="manual"; S.tournament.pairingMode="balanced";
+      log("seed","Shuffled bracket seeds. Balanced pairing prevents seed 1 from playing seed 2 in the opener.");
+      if(S.phase==="active") return rebuildCurrentBracket("Shuffle and rebuild bracket");
+      render();
+    }
+    function reseedByRoster(){
+      if(playedMatches().length) return alert("Reseed is locked after a real match is scored. Use Undo or Erase Tournament first.");
+      snapshot("Reset seeds");
+      activePlayers().forEach((p,i)=>{ p.seed=i+1; });
+      S.tournament.seedMode="manual"; log("seed","Reset seeds to roster order.");
+      if(S.phase==="active") return rebuildCurrentBracket("Reset seeds and rebuild bracket");
+      render();
+    }
+    function startTournament(){
+      if(activePlayers().length < 2) return alert("Need at least two checked-in players.");
+      if(!S.tournament.format) return alert("Choose a tournament format.");
+      if(!S.tournament.pairingMode) return alert("Choose a pairing / draw mode.");
+      if(!S.tournament.seedMode) return alert("Choose a seeding mode.");
+      if(Number(S.tournament.tables) < 1) return alert("Enter the number of tables.");
+      if(Number(S.tournament.raceTo) < 1) return alert("Enter the race length.");
+      snapshot("Start tournament");
+      S.phase = "active"; S.tab = "bracket"; S.tournament.startedAt = S.tournament.startedAt || NOW(); S.tournament.finishedAt = "";
+      S.matches = []; S.rounds = []; S.eliminationOrder = []; S.nextMatchId = 1;
+      activePlayers().forEach((p,i)=>{ ensurePlayerMemory(p); p.wins=0; p.losses=0; p.byeCount=0; p.racksWon=0; p.racksLost=0; p.ratingDelta=0; p.seed=p.seed||i+1; if(!p.rating) p.rating=Math.round(playerRating(p)); });
+      log("tournament","Tournament started"); createNextRound(false);
+    }
+    function createNextRound(showAlert){
+      if(S.phase === "setup") return showAlert && alert("Start the tournament first.");
+      if(S.phase === "complete") return showAlert && alert("Tournament is already complete.");
+      if(!S.tournament.format) return showAlert && alert("Choose a tournament format.");
+      if(!S.tournament.pairingMode) return showAlert && alert("Choose a pairing / draw mode.");
+      if(openMatches().length) return showAlert && alert("Finish open matches before building the next round.");
+      snapshot("Build next round");
+      if(S.tournament.format === "round_robin"){
+        if(!S.matches.length) return buildRoundRobin();
+        finishTournament(); return render();
+      }
+      const alive = alivePlayers();
+      if(alive.length <= 1){ finishTournament(); return render(); }
+      const roundNo = (S.rounds.length ? Math.max(...S.rounds.map(r=>Number(r.roundNo)||0)) : 0) + 1;
+      let created = [];
+      if(S.tournament.format === "single_elim"){
+        created = created.concat(pairPlayers(alive, alive.length===2 ? "Finals" : "Single Elimination", roundNo, alive.length===2 ? "Finals" : "Single Elimination Round "+roundNo, alive.length===2 ? Number(S.tournament.raceToFinal || S.tournament.raceTo) : Number(S.tournament.raceTo)));
+      }
+      else if(alive.length === 2) created = created.concat(pairPlayers(alive, "Finals", roundNo, finalLabel(alive), Number(S.tournament.raceToFinal || S.tournament.raceTo)));
+      else {
+        created = created.concat(pairPlayers(alive.filter(p=>p.losses===0), "Winners", roundNo, "Winners Round "+roundNo, Number(S.tournament.raceTo)));
+        created = created.concat(pairPlayers(alive.filter(p=>p.losses===1), "Elimination", roundNo, "Elimination Round "+roundNo, Number(S.tournament.raceTo)));
+      }
+      assignTables();
+      S.rounds.push({ roundNo, at:NOW(), count:created.length });
+      log("round", created.length ? "Built round "+roundNo+" with "+created.length+" matches" : "Round "+roundNo+" had byes only");
+      if(!created.length) setTimeout(()=>createNextRound(false),0);
+      render();
+    }
+    function pairPlayers(group, division, roundNo, label, raceTo){
+      let sorted = seedOrder(group);
+      const created = [];
+      if(sorted.length % 2 === 1){ const bye = sorted.shift(); if(bye){ bye.byeCount++; bye.wins++; S.matches.push({ id:S.nextMatchId++, roundNo, division, label:division+" Bye", playerA:bye.id, playerB:null, winner:bye.id, loser:null, scoreA:0, scoreB:0, status:"bye", table:null, raceTo, createdAt:NOW(), finishedAt:NOW(), notes:"Automatic bye" }); log("bye",bye.name+" receives a bye"); } }
+      if(S.tournament.pairingMode === "random_draw") sorted = shuffle(sorted);
+      while(sorted.length >= 2){ const a=sorted.shift(), b=S.tournament.pairingMode==="adjacent" ? sorted.shift() : sorted.pop(); const m={ id:S.nextMatchId++, roundNo, division, label, playerA:a.id, playerB:b.id, winner:null, loser:null, scoreA:0, scoreB:0, status:"ready", table:null, raceTo, createdAt:NOW(), startedAt:"", finishedAt:"", notes:"" }; S.matches.push(m); created.push(m); }
+      return created;
+    }
+    function seedOrder(group){ return group.slice().sort((a,b)=>(a.byeCount-b.byeCount)||(a.losses-b.losses)||((b.wins||0)-(a.wins||0))||(S.tournament.seedMode==="rating" ? (playerRating(b)-playerRating(a)) : S.tournament.seedMode==="entry" ? (a.id-b.id) : ((a.seed||9999)-(b.seed||9999)))||a.name.localeCompare(b.name)); }
+    function shuffle(list){ const out=list.slice(); for(let i=out.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [out[i],out[j]]=[out[j],out[i]]; } return out; }
+    function buildRoundRobin(){
+      const entrants = seedOrder(activePlayers());
+      const raceTo = Number(S.tournament.raceTo);
+      const created = [];
+      for(let i=0;i<entrants.length;i++){
+        for(let j=i+1;j<entrants.length;j++){
+          const roundNo = j;
+          const m={ id:S.nextMatchId++, roundNo, division:"Round Robin", label:"Round Robin Round "+roundNo, playerA:entrants[i].id, playerB:entrants[j].id, winner:null, loser:null, scoreA:0, scoreB:0, status:"ready", table:null, raceTo, createdAt:NOW(), startedAt:"", finishedAt:"", notes:"" };
+          S.matches.push(m); created.push(m);
+        }
+      }
+      assignTables();
+      S.rounds.push({ roundNo:1, at:NOW(), count:created.length, format:"round_robin" });
+      log("round","Built round robin with "+created.length+" matches");
+      render();
+    }
+    function assignTables(){ const n = Math.max(1, Number(S.tournament.tables||1)); openMatches().forEach((m,i)=>m.table=(i%n)+1); }
+    function finalLabel(alive){ return alive.some(p=>p.losses===0) && alive.some(p=>p.losses===1) ? "Finals" : "Final Reset"; }
+    function match(id){ return S.matches.find(m=>Number(m.id)===Number(id)); }
+    function matchById(id){ return match(id); }
+    function playerById(id){ return player(id); }
+    function adjustScore(id,side,delta){ const m=match(id); if(!m || m.status==="done" || m.status==="bye") return; snapshot("Adjust score"); if(side==="A") m.scoreA=Math.max(0,Number(m.scoreA||0)+Number(delta)); else m.scoreB=Math.max(0,Number(m.scoreB||0)+Number(delta)); if(Math.max(m.scoreA||0,m.scoreB||0)>=Number(m.raceTo||S.tournament.raceTo)-1 && Math.abs((m.scoreA||0)-(m.scoreB||0))===0) m.status="hill_hill"; render(); }
+    function recordWinner(id,winnerId){
+      const m=match(id); if(!m || m.status==="done" || m.status==="bye") return;
+      const winner=player(winnerId); const loserId = Number(winnerId)===Number(m.playerA) ? m.playerB : m.playerA; const loser=player(loserId);
+      if(!winner || !loser) return alert("Match player not found.");
+      snapshot("Record winner");
+      let winnerScore = Number(winner.id)===Number(m.playerA) ? Number(m.scoreA||0) : Number(m.scoreB||0);
+      let loserScore = Number(winner.id)===Number(m.playerA) ? Number(m.scoreB||0) : Number(m.scoreA||0);
+      const race = Math.max(1, Number(m.raceTo || S.tournament.raceTo || 1));
+      if(winnerScore===0 && loserScore===0){
+        winnerScore = race;
+        if(Number(winner.id)===Number(m.playerA)) m.scoreA = winnerScore; else m.scoreB = winnerScore;
+      }
+      if(winnerScore <= loserScore){
+        winnerScore = Math.max(loserScore + 1, race);
+        if(Number(winner.id)===Number(m.playerA)) m.scoreA = winnerScore; else m.scoreB = winnerScore;
+      }
+      const ratingResult = ratingUpdate(winner, loser, winnerScore, loserScore, race);
+      m.winner=winner.id; m.loser=loser.id; m.status="done"; m.finishedAt=NOW(); if(!m.startedAt) m.startedAt=m.finishedAt;
+      winner.wins++; loser.losses++;
+      winner.racksWon += winnerScore; winner.racksLost += loserScore; loser.racksWon += loserScore; loser.racksLost += winnerScore;
+      updatePlayerMemoryFromMatch(winner, loser, winnerScore, loserScore, ratingResult);
+      if(loser.losses >= lossLimit() && !S.eliminationOrder.includes(loser.id)) S.eliminationOrder.push(loser.id);
+      log("match", winner.name+" defeated "+loser.name+" "+winnerScore+"-"+loserScore);
+      assignTables(); if(S.tournament.format==="round_robin" ? !openMatches().length : alivePlayers().length <= 1) finishTournament(); render();
+    }
+    function setStatus(id,status){ const m=match(id); if(!m || m.status==="done" || m.status==="bye") return; snapshot("Set status"); m.status=status; if(status==="on_table" && !m.startedAt) m.startedAt=NOW(); log("match","Match "+id+" set to "+statusText(status)); render(); }
+    function setMatchStatus(id,status){ return setStatus(id,status); }
+    function toggleHill(id){ const m=match(id); if(!m || m.status==="done" || m.status==="bye") return; setStatus(id,m.status==="hill_hill"?"on_table":"hill_hill"); }
+    function callMatch(id){ return setStatus(id,"called"); }
+    function callAll(){ snapshot("Call all"); activeMatches().forEach(m=>{ if(m.status==="ready") m.status="called"; }); log("call","Called all live tables"); render(); }
+    function callAllTables(){ return callAll(); }
+    function finishTournament(){ const champ = alivePlayers()[0] || standings()[0]; S.phase="complete"; S.tournament.finishedAt = S.tournament.finishedAt || NOW(); if(champ) log("complete",champ.name+" wins the tournament"); }
+    function stopTournamentKeepSetup(){ return reopenSetup(); }
+    function reopenSetup(){ snapshot("Reopen setup"); S.phase="setup"; S.matches=[]; S.rounds=[]; S.eliminationOrder=[]; activePlayers().forEach(p=>{p.wins=0;p.losses=0;p.byeCount=0;p.racksWon=0;p.racksLost=0;}); render(); }
+    function resetTournament(){ if(!confirm("Erase this tournament and start a blank one? This clears players, matches, money, and scores for the current event.")) return; S=clone(DEFAULT); log("system","Tournament erased"); render(); }
+    function entryFee(){ return Number(S.bank.buyIn||0) + Number(S.bank.sidePot||0); }
+    function payoutRuleText(){ return activePlayers().length <= 9 ? "9 or less: winner take all" : "10 or more: 1st and 2nd plus 3rd entry fee back"; }
+    function calcPayouts(){
+      const count=activePlayers().length, pot=totalPot(), roundTo=Math.max(1,Number(S.bank.roundTo||1));
+      const names=S.bank.names||[];
+      if(count <= 9) return [{ place:"1st", pct:100, amount:pot, name:names[0]||"" }];
+      const third=Math.min(entryFee(), pot);
+      const remaining=Math.max(0, pot-third);
+      const firstPct=Math.max(0,Number(S.bank.pcts[0]||70)), secondPct=Math.max(0,Number(S.bank.pcts[1]||30));
+      const pctTotal=firstPct+secondPct || 100;
+      let first=Math.round((remaining*(firstPct/pctTotal))/roundTo)*roundTo;
+      first=Math.min(first,remaining);
+      const second=Math.max(0,remaining-first);
+      return [
+        { place:"1st", pct:firstPct, amount:first, name:names[0]||"" },
+        { place:"2nd", pct:secondPct, amount:second, name:names[1]||"" },
+        { place:"3rd", pct:0, amount:third, name:names[2]||"", locked:true }
+      ];
+    }
+    function undo(){ const last=S.history.pop(); if(!last) return alert("No undo history."); const keep=S.history.slice(); S=normalize(last.state); S.history=keep; log("undo","Undid: "+last.label); render(); }
+    function saveCheckpoint(){ save(); savePlayerDb(); log("save","Checkpoint saved"); alert("Saved checkpoint locally."); }
+    function buildReport(){ const lines=[]; lines.push(S.tournament.name || "Green Rack Runner"); lines.push([S.tournament.venue,S.tournament.date].filter(Boolean).join(" | ")); lines.push("Phase: "+S.phase); lines.push("Format: "+formatLabel()); lines.push("Players: "+activePlayers().length); lines.push("Pot: "+money(totalPot())); lines.push(""); lines.push("STANDINGS"); standings().forEach((p,i)=>lines.push(`${i+1}. ${p.name} - ${p.wins||0}W/${p.losses||0}L - Rating ${Math.round(playerRating(p))} - ${p.paid?"Paid":"Due"}`)); lines.push(""); lines.push("OPEN MATCHES"); openMatches().forEach(m=>lines.push(`Table ${m.table||"-"}: ${playerName(m.playerA)} vs ${playerName(m.playerB)} - ${statusText(m.status)} - ${m.label}`)); lines.push(""); lines.push("PAYOUTS"); calcPayouts().forEach(p=>lines.push(`${p.place}: ${money(p.amount)}`)); return lines.join("\n"); }
+    function copyDirectorReport(){ copyText(buildReport()); alert("Director report copied."); }
+    function copyText(text){ if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text); }
+    function closeModal(){ const host=$("modalHost"); if(host) host.innerHTML=""; }
+    function openRosterManager(){ S.tab="players"; render(); }
+    function openMatchManager(){ const host=$("modalHost"); if(!host) return; const matches=S.matches.filter(m=>m.status!=="bye"); host.innerHTML=`<div class="modalShade" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()"><div class="head"><div><h2>Match Manager</h2><div class="sub">${matches.length} matches | ${openMatches().length} open</div></div><button class="ghost" onclick="closeModal()">Close</button></div><div class="row"><button class="primary" onclick="createNextRound(true);openMatchManager()">Build Next</button><button class="good" onclick="callAll();openMatchManager()">Call All</button><button class="warn" onclick="copyDirectorReport()">Report</button></div><div class="hr"></div><div class="list">${matches.map(renderMatchManagerRow).join("") || '<div class="sub">No matches yet.</div>'}</div></div></div>`; }
+    function renderMatchManagerRow(m){ const a=player(m.playerA), b=player(m.playerB); return `<div class="item"><span class="badge ${m.status==="done"?"good":m.status==="disputed"?"danger":"blue"}">T${m.table||"-"}</span><div><b>${esc(playerName(m.playerA))} vs ${esc(playerName(m.playerB))}</b><div class="sub">${esc(m.label)} | ${statusText(m.status)} | ${m.scoreA||0}-${m.scoreB||0}</div></div><div class="row">${m.status==="done"?"":`<button class="small" onclick="setStatus(${m.id},'called');openMatchManager()">Call</button><button class="small good" onclick="setStatus(${m.id},'on_table');openMatchManager()">Table</button>${a?`<button class="small primary" onclick="recordWinner(${m.id},${a.id});openMatchManager()">A Win</button>`:""}${b?`<button class="small primary" onclick="recordWinner(${m.id},${b.id});openMatchManager()">B Win</button>`:""}`}</div></div>`; }
+    function validateState(x){
+      if(!x || typeof x !== "object") throw new Error("Backup is not an object.");
+      if(!Array.isArray(x.players) || !Array.isArray(x.matches)) throw new Error("Backup missing players or matches.");
+      const ids = new Set(); x.players.forEach(p=>{ const id=Number(p.id); if(!id) throw new Error("Player missing id."); if(!p.name) throw new Error("Player missing name."); if(ids.has(id)) throw new Error("Duplicate player id."); ids.add(id); });
+      const matchIds = new Set();
+      x.matches.forEach(m=>{ const id=Number(m.id); if(!id || !m.status) throw new Error("Invalid match."); if(matchIds.has(id)) throw new Error("Duplicate match id."); matchIds.add(id); if(m.playerA && !ids.has(Number(m.playerA))) throw new Error("Match references missing player."); if(m.playerB && !ids.has(Number(m.playerB))) throw new Error("Match references missing player."); if(m.playerA && m.playerB && Number(m.playerA)===Number(m.playerB)) throw new Error("Match cannot reference the same player twice."); if(m.winner && !ids.has(Number(m.winner))) throw new Error("Match winner references missing player."); if(m.loser && !ids.has(Number(m.loser))) throw new Error("Match loser references missing player."); });
+      return true;
+    }
+    function exportBackup(){ const payload={app:"Green Rack Runner", version:S.version, exportedAt:NOW(), state:S, playerDb:DB, setupPresets:PRESETS}; downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}), safeFile((S.tournament.name||"green-rack-runner")+"-backup.json")); }
+    function importBackup(file){ if(!file) return; const r=new FileReader(); r.onload=()=>{ try{ const parsed=JSON.parse(r.result); const nextState=parsed.state || parsed; validateState(nextState); snapshot("Import backup"); S=normalize(nextState); if(parsed.playerDb) DB=normalizePlayerDb(parsed.playerDb); if(parsed.setupPresets) PRESETS=normalizeSetupPresets(parsed.setupPresets); log("backup","Imported backup"); render(); } catch(e){ alert("Backup import failed: "+e.message); } }; r.readAsText(file); }
+    function exportCSV(){ const rows=[["section","id","name","wins","losses","racksWon","racksLost","paid"],...activePlayers().map(p=>["player",p.id,p.name,p.wins,p.losses,p.racksWon,p.racksLost,p.paid]),["match_id","round","division","playerA","playerB","winner","scoreA","scoreB","status"],...S.matches.map(m=>["match",m.id,m.roundNo,m.division,playerName(m.playerA),playerName(m.playerB),m.winner?playerName(m.winner):"",m.scoreA,m.scoreB,m.status])]; downloadBlob(new Blob([rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n")],{type:"text/csv"}), safeFile((S.tournament.name||"green-rack-runner")+"-export.csv")); }
+    function exportPlayerDbCSV(){ const rows=[["id","name","rating","peakRating","matches","wins","losses","racksWon","racksLost","lastSeen"],...DB.players.map(r=>[r.id,r.name,Math.round(r.rating||0),Math.round(r.peakRating||r.rating||0),r.matches||0,r.wins||0,r.losses||0,r.racksWon||0,r.racksLost||0,r.lastSeen||""])]; downloadBlob(new Blob([rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n")],{type:"text/csv"}), safeFile("green-rack-runner-player-database.csv")); }
+    function downloadBlob(blob,name){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+    function safeFile(name){ return String(name).toLowerCase().replace(/[^a-z0-9._-]+/g,"-").replace(/-+/g,"-"); }
+    function copyStandings(){ navigator.clipboard && navigator.clipboard.writeText(standings().map((p,i)=>`${i+1}. ${p.name} - ${p.wins||0}W/${p.losses||0}L`).join("\n")); alert("Standings copied."); }
+    $("backupFile").addEventListener("change", ev => importBackup(ev.target.files[0]));
+    startSync();
+    render();
+  </script>
+</body>
+</html>
+
+
+

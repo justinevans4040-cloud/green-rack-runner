@@ -1,8 +1,8 @@
 @echo off
 setlocal
-set "APPFILE=%LOCALAPPDATA%\RackRunner\rack-runner-tournament-director.html"
+set "APPFILE=%~dp0index.html"
 if not exist "%APPFILE%" (
-  echo Rack Runner app file not found:
+  echo Green Rack Runner index.html not found:
   echo %APPFILE%
   pause
   exit /b 1

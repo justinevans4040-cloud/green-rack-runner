@@ -1,0 +1,10 @@
+{
+  "name": "rack-runner-desktop",
+  "productName": "Rack Runner",
+  "version": "1.0.0",
+  "description": "Rack Runner pool tournament command center",
+  "main": "electron/main.cjs",
+  "author": "Justin Evans",
+  "license": "UNLICENSED",
+  "private": true
+}
